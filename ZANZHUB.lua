@@ -1,1 +1,489 @@
-local a=game:GetService("Players");local b=game:GetService("RunService");local c=game:GetService("UserInputService");local f=a.LocalPlayer;local g=workspace.CurrentCamera;local h=getgenv and getgenv()or getfenv();local i={enabled=false,flying=false,speed=50};local j={enabled=false,teamCheck=false,maxDist=3000,txtSize=14};local k={flyToggle=Enum.KeyCode.F};local l={};local m={};local function o(p)local q={};for r=1,p or 12 do q[r]=string.char(math.random(65,90)+math.random(0,1)*32)end;return table.concat(q)end;local function s(t)pcall(function()if type(t)=="table"then for u,v in pairs(t)do if typeof(v)=="Instance"then pcall(function()v:Destroy()end)end end elseif typeof(t)=="Instance"then t:Destroy()end end)end;local function w(x)if x and typeof(x)=="RBXScriptConnection"then pcall(function()x:Disconnect()end)end end;local y={};local z=nil;local function A()i.flying=false;w(z);z=nil;s(y);table.clear(y);pcall(function()local B=f.Character;if B then local C=B:FindFirstChildWhichIsA("Humanoid");if C then C.PlatformStand=false end end end)end;local function D()A();local B=f.Character;if not B then return end;local E=B:FindFirstChildWhichIsA("BasePart")or B:FindFirstChild("HumanoidRootPart");if not E then return end;local C=B:FindFirstChildWhichIsA("Humanoid");if C then C.PlatformStand=false end;local F=Instance.new("BodyGyro");F.MaxTorque=Vector3.new(1/0,1/0,1/0);F.P=30000;F.D=500;F.Name=o();F.Parent=E;y.gyro=F;local G=Instance.new("BodyVelocity");G.MaxForce=Vector3.new(1/0,1/0,1/0);G.P=5000;G.Velocity=Vector3.zero;G.Name=o();G.Parent=E;y.vel=G;i.flying=true;z=b.Heartbeat:Connect(function()if not i.flying then return end;local H=f.Character;if not H then return end;local I=H:FindFirstChildWhichIsA("BasePart")or H:FindFirstChild("HumanoidRootPart");if not I then return end;local J=I:FindFirstChildOfClass("BodyGyro");local K=I:FindFirstChildOfClass("BodyVelocity");if not J or not K then return end;local L=g.CFrame;local M=Vector3.zero;if c:IsKeyDown(Enum.KeyCode.W)then M+=L.LookVector end;if c:IsKeyDown(Enum.KeyCode.S)then M-=L.LookVector end;if c:IsKeyDown(Enum.KeyCode.A)then M-=L.RightVector end;if c:IsKeyDown(Enum.KeyCode.D)then M+=L.RightVector end;if c:IsKeyDown(Enum.KeyCode.Space)then M+=Vector3.yAxis end;if c:IsKeyDown(Enum.KeyCode.LeftShift)then M-=Vector3.yAxis end;K.Velocity=M.Magnitude>0 and M.Unit*i.speed or Vector3.zero;J.CFrame=CFrame.new(I.Position,I.Position+L.LookVector)end)end;local function N()i.enabled=not i.enabled;if i.enabled then D()else A()end end;local function O()for P,Q in pairs(m)do s(Q)end;table.clear(m);for P,R in ipairs(l)do w(R)end;table.clear(l)end;local function S(T)if T==f then return end;local function U(V)local W=Instance.new("Highlight");W.Name=o(14);W.DepthMode=Enum.HighlightDepthMode.AlwaysOnTop;W.FillTransparency=0.85;W.OutlineTransparency=0;W.Parent=V;local X=Instance.new("BillboardGui");X.Name=o(14);X.AlwaysOnTop=true;X.Size=UDim2.new(0,220,0,50);X.StudsOffset=Vector3.new(0,3.2,0);X.Parent=V:WaitForChild("Head",5);local Y=Instance.new("TextLabel");Y.BackgroundTransparency=1;Y.TextStrokeTransparency=0;Y.TextStrokeColor3=Color3.new();Y.Font=Enum.Font.SourceSansBold;Y.TextSize=j.txtSize;Y.Parent=X;m[T]={hl=W,bg=X,tl=Y};local Z=b.RenderStepped:Connect(function()if not j.enabled then return end;local _=f.Character;local a0=_ and(_.FindFirstChildWhichIsA("BasePart")or _.FindFirstChild("HumanoidRootPart"));local a1=T.Character;if not a1 then return end;local a2=a1.FindFirstChildWhichIsA("BasePart")or a1.FindFirstChild("HumanoidRootPart");local a3=a1.FindFirstChild("Head");local a4=a1.FindFirstChildWhichIsA("Humanoid");if not a2 or not a3 or not a4 then return end;local a5=a0 and(a0.Position-a2.Position).Magnitude or 99999;local a6=a5<=j.maxDist;if X then X.Enabled=a6 end;if W then W.Enabled=a6 end;if not a6 then return end;local a7=math.floor(a4.Health);local a8=math.floor(a4.MaxHealth);local a9=Color3.fromRGB(255,80,80);local b0=Color3.fromRGB(255,100,100);if j.teamCheck and T.Team==f.Team then a9=Color3.fromRGB(80,255,80);b0=Color3.fromRGB(80,255,100)end;W.FillColor=a9;W.OutlineColor=a9;Y.TextColor3=b0;Y.Text=string.format("%s  |  %d/%d HP  |  %.0f st",T.Name,a7,a8,a5)end);table.insert(l,Z)end;if T.Character then U(T.Character)end;table.insert(l,T.CharacterAdded:Connect(U))end;local function b1()O();if not j.enabled then return end;for P,b2 in ipairs(a:GetPlayers())do S(b2)end;table.insert(l,a.PlayerAdded:Connect(function(b2)if j.enabled then S(b2)end end));table.insert(l,a.PlayerRemoving:Connect(function(b2)if m[b2]then s(m[b2]);m[b2]=nil end end))end;local function b3()j.enabled=not j.enabled;b1()end;local function b4(b5,b6)table.insert(l,c.InputBegan:Connect(function(b7,b8)if b8 then return end;if b7.KeyCode==k[b5]then b6()end end))end;b4("flyToggle",function()N();b9()end);local ba=Instance.new("ScreenGui");ba.Name=o(16);ba.Parent=f:WaitForChild("PlayerGui");ba.ResetOnSpawn=false;ba.ZIndexBehavior=Enum.ZIndexBehavior.Sibling;local bb=Instance.new("Frame");bb.Name=o(12);bb.Size=UDim2.new(0,340,0,500);bb.Position=UDim2.new(0.5,-170,0.5,-250);bb.BackgroundColor3=Color3.fromRGB(18,18,23);bb.BorderSizePixel=0;bb.Active=true;bb.Draggable=true;bb.Parent=ba;do local bc=Instance.new("UICorner");bc.CornerRadius=UDim.new(0,8);bc.Parent=bb;local bd=Instance.new("UIStroke");bd.Color=Color3.fromRGB(160,50,50);bd.Thickness=1.5;bd.Parent=bb end;local be=Instance.new("TextLabel");be.Size=UDim2.new(1,0,0,38);be.BackgroundColor3=Color3.fromRGB(26,26,33);be.TextColor3=Color3.fromRGB(255,100,100);be.Font=Enum.Font.SourceSansBold;be.TextSize=18;be.Text="  ZANZ HUB v2  |  Loadstring";be.TextXAlignment=Enum.TextXAlignment.Left;be.BorderSizePixel=0;be.Parent=bb;do local bc=Instance.new("UICorner");bc.CornerRadius=UDim.new(0,8);bc.Parent=be end;local bf=Instance.new("TextButton");bf.Size=UDim2.new(0,36,0,36);bf.Position=UDim2.new(1,-36,0,0);bf.BackgroundColor3=Color3.fromRGB(190,45,45);bf.TextColor3=Color3.new(1,1,1);bf.Font=Enum.Font.SourceSansBold;bf.TextSize=18;bf.Text="X";bf.BorderSizePixel=0;bf.Parent=be;bf.MouseButton1Click:Connect(function()ba:Destroy()O()A()end);do local bc=Instance.new("UICorner");bc.CornerRadius=UDim.new(0,8);bc.Parent=bf end;local bg=Instance.new("ScrollingFrame");bg.Size=UDim2.new(1,-16,1,-50);bg.Position=UDim2.new(0,8,0,46);bg.CanvasSize=UDim2.new(0,0,0,520);bg.ScrollBarThickness=4;bg.BackgroundTransparency=1;bg.BorderSizePixel=0;bg.Parent=bb;local function bh(bi,bj,bk,bl)local bm=Instance.new("Frame");bm.Size=UDim2.new(1,-8,0,bl);bm.Position=UDim2.new(0,4,0,bk);bm.BackgroundColor3=Color3.fromRGB(26,26,33);bm.BorderSizePixel=0;bm.Parent=bi;local bc=Instance.new("UICorner");bc.CornerRadius=UDim.new(0,6);bc.Parent=bm;local bn=Instance.new("TextLabel");bn.Size=UDim2.new(1,-20,0,22);bn.Position=UDim2.new(0,10,0,6);bn.BackgroundTransparency=1;bn.TextColor3=Color3.fromRGB(255,140,80);bn.Font=Enum.Font.SourceSansBold;bn.TextSize=14;bn.Text=" "..bj;bn.TextXAlignment=Enum.TextXAlignment.Left;bn.Parent=bm;return bm,bn end;local function bo(bp,bq,br,bs,bt,bu,bv)local bw=Instance.new("TextButton");bw.Size=UDim2.new(0,bs,0,bt);bw.Position=UDim2.new(0,bq,0,br);bw.BackgroundColor3=bu;bw.TextColor3=Color3.new(1,1,1);bw.Font=Enum.Font.SourceSansBold;bw.TextSize=12;bw.Text=bt;bw.BorderSizePixel=0;bw.Parent=bp;local bc=Instance.new("UICorner");bc.CornerRadius=UDim.new(0,5);bc.Parent=bw;if bv then bw.MouseButton1Click:Connect(bv)end;return bw end;local function bx(by,bq,br,bs,bt,bz,c0)local c1=Instance.new("TextLabel");c1.Size=UDim2.new(0,bs,0,bt);c1.Position=UDim2.new(0,bq,0,br);c1.BackgroundTransparency=1;c1.TextColor3=Color3.fromRGB(200,200,200);c1.Font=Enum.Font.SourceSans;c1.TextSize=c0 or 12;c1.Text=bz;c1.TextXAlignment=Enum.TextXAlignment.Left;c1.Parent=by;return c1 end;local function c2(c3,bq,br,bs,bt,bz,c4)local c5=Instance.new("TextBox");c5.Size=UDim2.new(0,bs,0,bt);c5.Position=UDim2.new(0,bq,0,br);c5.BackgroundColor3=Color3.fromRGB(38,38,45);c5.TextColor3=Color3.new(1,1,1);c5.Font=Enum.Font.SourceSans;c5.TextSize=12;c5.Text=bz;c5.BorderSizePixel=0;c5.Parent=c3;local bc=Instance.new("UICorner");bc.CornerRadius=UDim.new(0,4);bc.Parent=c5;if c4 then c5.FocusLost:Connect(function(c6)c4(c5,c6)end)end;return c5 end;local c7=false;local c8=nil;local c9,c10=bh(bg," FLIGHT",4,170);local cb=bo(c9,10,32,130,30,"FLY: OFF",Color3.fromRGB(180,55,55),function()N();b9()end);bx(c9,150,32,60,30,"Speed:",12);local cc=c2(c9,210,34,70,24,tostring(i.speed),function(c5)local cd=tonumber(c5.Text);if cd then i.speed=math.clamp(cd,1,1000);cc.Text=tostring(i.speed)end end);bx(c9,10,75,120,20,"Fly Toggle Key:",12);local ce=bo(c9,130,72,140,24,"["..k.flyToggle.Name.."]",Color3.fromRGB(55,55,65),function()c7=true;c8="flyToggle";ce.Text="... press any key ...";ce.BackgroundColor3=Color3.fromRGB(220,150,30)end);bx(c9,10,110,160,20,"WASD = move | SPACE = up | SHIFT = down",10);local cf,cg=bh(bg," WALLHACK (ESP)",188,160);local ch=bo(cf,10,32,130,30,"ESP: OFF",Color3.fromRGB(180,55,55),function()b3();b9()end);bo(cf,150,32,140,30,"Refresh ESP",Color3.fromRGB(90,55,170),function()if j.enabled then b1()end end);local ci=bo(cf,10,72,240,26,"Team Check: OFF",Color3.fromRGB(38,38,45),function()j.teamCheck=not j.teamCheck;ci.Text=j.teamCheck and"Team Check: ON"or"Team Check: OFF";ci.BackgroundColor3=j.teamCheck and Color3.fromRGB(55,90,170)or Color3.fromRGB(38,38,45);if j.enabled then b1()end end);bx(cf,10,108,80,20,"Max Dist:",12);local cj=c2(cf,80,110,80,22,tostring(j.maxDist),function(c5)local cd=tonumber(c5.Text);if cd then j.maxDist=math.clamp(cd,100,99999)end end);bx(cf,10,138,80,20,"Text Size:",12);c2(cf,80,140,50,20,tostring(j.txtSize),function(c5)local cd=tonumber(c5.Text);if cd then j.txtSize=math.clamp(cd,8,24)end end);local ck,cl=bh(bg," CUSTOM HOTKEYS",362,140);bx(ck,10,32,200,20,"Fly Toggle Key:",12);local cm=bo(ck,150,30,150,24,"["..k.flyToggle.Name.."]",Color3.fromRGB(55,55,65),function()c7=true;c8="flyToggle";cm.Text="... press any key ...";cm.BackgroundColor3=Color3.fromRGB(220,150,30)end);bx(ck,10,65,300,20,"Rebind any key by clicking the button then pressing a key",10);bx(ck,10,90,300,16,"Keybinds save for session only.",10);function b9()cb.Text=i.enabled and"FLY: ON"or"FLY: OFF";cb.BackgroundColor3=i.enabled and Color3.fromRGB(55,180,55)or Color3.fromRGB(180,55,55);ch.Text=j.enabled and"ESP: ON"or"ESP: OFF";ch.BackgroundColor3=j.enabled and Color3.fromRGB(55,180,55)or Color3.fromRGB(180,55,55);cm.Text="["..k.flyToggle.Name.."]";ce.Text="["..k.flyToggle.Name.."]"end;table.insert(l,c.InputBegan:Connect(function(b7,b8)if not c7 then return end;c7=false;if not b7 or b7.UserInputType==Enum.UserInputType.MouseButton1 then return end;local cn=b7.KeyCode;if cn==Enum.KeyCode.Unknown then return end;if c8 and k[c8]then k[c8]=cn end;b9();cm.BackgroundColor3=Color3.fromRGB(55,55,65);ce.BackgroundColor3=Color3.fromRGB(55,55,65);task.wait(0.1);for P,R in ipairs(l)do w(R)end;table.clear(l);b4("flyToggle",function()N();b9()end)end));table.insert(l,f.CharacterAdded:Connect(function()if i.enabled then A();task.wait(0.15);D()end end));for P,b2 in ipairs(a:GetPlayers())do if j.enabled then S(b2)end end;f.OnTeleport:Connect(function(co)if co==Enum.TeleportState.Started then O();A()end end);if syn and syn.protect_gui then syn.protect_gui(ba)end;pcall(function()game.StarterGui:SetCore("SendNotification",{Title="ZANZ Hub v2",Text="Loadstring Active | F = Fly Toggle",Duration=5})end);
+local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
+local UIS = game:GetService("UserInputService")
+local LocalPlayer = Players.LocalPlayer
+local Camera = workspace.CurrentCamera
+
+local Fly = {enabled=false, flying=false, speed=50}
+local ESP = {enabled=false, teamCheck=false, maxDist=3000, txtSize=14}
+local Keys = {flyToggle=Enum.KeyCode.F}
+local Connections = {}
+local ESPData = {}
+
+local function randStr(len)
+    local t = {}
+    for i = 1, (len or 12) do
+        t[i] = string.char(math.random(65, 90) + math.random(0, 1) * 32)
+    end
+    return table.concat(t)
+end
+
+local function cleanup(obj)
+    pcall(function()
+        if type(obj) == "table" then
+            for _, v in pairs(obj) do
+                if typeof(v) == "Instance" then pcall(function() v:Destroy() end) end
+            end
+        elseif typeof(obj) == "Instance" then
+            obj:Destroy()
+        end
+    end)
+end
+
+local function disconnect(c)
+    if c and typeof(c) == "RBXScriptConnection" then
+        pcall(function() c:Disconnect() end)
+    end
+end
+
+-- ===== FLY =====
+local flyParts = {}
+local flyConn = nil
+
+local function killFly()
+    Fly.flying = false
+    disconnect(flyConn)
+    flyConn = nil
+    cleanup(flyParts)
+    flyParts = {}
+    pcall(function()
+        local c = LocalPlayer.Character
+        if c then
+            local h = c:FindFirstChildOfClass("Humanoid")
+            if h then h.PlatformStand = false end
+        end
+    end)
+end
+
+local function buildFly()
+    killFly()
+    local char = LocalPlayer.Character
+    if not char then return end
+    local root = char:FindFirstChild("HumanoidRootPart")
+    if not root then return end
+    local hum = char:FindFirstChildOfClass("Humanoid")
+    if hum then hum.PlatformStand = false end
+
+    local gyro = Instance.new("BodyGyro")
+    gyro.MaxTorque = Vector3.new(1/0, 1/0, 1/0)
+    gyro.P = 30000
+    gyro.D = 500
+    gyro.Name = randStr()
+    gyro.Parent = root
+
+    local vel = Instance.new("BodyVelocity")
+    vel.MaxForce = Vector3.new(1/0, 1/0, 1/0)
+    vel.P = 5000
+    vel.Velocity = Vector3.zero
+    vel.Name = randStr()
+    vel.Parent = root
+
+    flyParts = {gyro=gyro, vel=vel}
+    Fly.flying = true
+
+    flyConn = RunService.Heartbeat:Connect(function()
+        if not Fly.flying then return end
+        local c = LocalPlayer.Character
+        if not c then return end
+        local rp = c:FindFirstChild("HumanoidRootPart")
+        if not rp then return end
+        local g = rp:FindFirstChildOfClass("BodyGyro")
+        local v = rp:FindFirstChildOfClass("BodyVelocity")
+        if not g or not v then return end
+
+        local cf = Camera.CFrame
+        local dir = Vector3.zero
+        if UIS:IsKeyDown(Enum.KeyCode.W) then dir = dir + cf.LookVector end
+        if UIS:IsKeyDown(Enum.KeyCode.S) then dir = dir - cf.LookVector end
+        if UIS:IsKeyDown(Enum.KeyCode.A) then dir = dir - cf.RightVector end
+        if UIS:IsKeyDown(Enum.KeyCode.D) then dir = dir + cf.RightVector end
+        if UIS:IsKeyDown(Enum.KeyCode.Space) then dir = dir + Vector3.yAxis end
+        if UIS:IsKeyDown(Enum.KeyCode.LeftShift) then dir = dir - Vector3.yAxis end
+
+        v.Velocity = dir.Magnitude > 0 and dir.Unit * Fly.speed or Vector3.zero
+        g.CFrame = CFrame.new(rp.Position, rp.Position + cf.LookVector)
+    end)
+end
+
+local function toggleFly()
+    Fly.enabled = not Fly.enabled
+    if Fly.enabled then buildFly() else killFly() end
+end
+
+-- ===== ESP =====
+local function nukeESP()
+    for _, tbl in pairs(ESPData) do cleanup(tbl) end
+    ESPData = {}
+    for _, cx in ipairs(Connections) do disconnect(cx) end
+    Connections = {}
+end
+
+local function attachESP(plr)
+    if plr == LocalPlayer then return end
+
+    local function wire(char)
+        local hl = Instance.new("Highlight")
+        hl.Name = randStr(14)
+        hl.DepthMode = Enum.HighlightDepthMode.AlwaysOnTop
+        hl.FillTransparency = 0.85
+        hl.OutlineTransparency = 0
+        hl.Parent = char
+
+        local bg = Instance.new("BillboardGui")
+        bg.Name = randStr(14)
+        bg.AlwaysOnTop = true
+        bg.Size = UDim2.new(0, 220, 0, 50)
+        bg.StudsOffset = Vector3.new(0, 3.2, 0)
+        bg.Adornee = char:WaitForChild("Head", 5)
+
+        local tl = Instance.new("TextLabel")
+        tl.BackgroundTransparency = 1
+        tl.TextStrokeTransparency = 0
+        tl.TextStrokeColor3 = Color3.new()
+        tl.Font = Enum.Font.SourceSansBold
+        tl.TextSize = ESP.txtSize
+        tl.Size = UDim2.new(1, 0, 1, 0)
+        tl.Parent = bg
+
+        ESPData[plr] = {hl=hl, bg=bg, tl=tl}
+
+        local tick = RunService.RenderStepped:Connect(function()
+            if not ESP.enabled then return end
+            local ourChar = LocalPlayer.Character
+            local ourRoot = ourChar and ourChar:FindFirstChild("HumanoidRootPart")
+            local theirChar = plr.Character
+            if not theirChar then return end
+            local theirRoot = theirChar:FindFirstChild("HumanoidRootPart")
+            local theirHead = theirChar:FindFirstChild("Head")
+            local theirHum = theirChar:FindFirstChildOfClass("Humanoid")
+            if not theirRoot or not theirHead or not theirHum then return end
+
+            local dist = ourRoot and (ourRoot.Position - theirRoot.Position).Magnitude or 99999
+            local vis = dist <= ESP.maxDist
+
+            bg.Enabled = vis
+            hl.Enabled = vis
+            if not vis then return end
+
+            local hp = math.floor(theirHum.Health)
+            local mhp = math.floor(theirHum.MaxHealth)
+            local clr = Color3.fromRGB(255, 80, 80)
+            local nmClr = Color3.fromRGB(255, 100, 100)
+
+            if ESP.teamCheck and plr.Team == LocalPlayer.Team then
+                clr = Color3.fromRGB(80, 255, 80)
+                nmClr = Color3.fromRGB(80, 255, 100)
+            end
+
+            hl.FillColor = clr
+            hl.OutlineColor = clr
+            tl.TextColor3 = nmClr
+            tl.Text = string.format("%s  |  %d/%d HP  |  %.0f st", plr.Name, hp, mhp, dist)
+        end)
+        table.insert(Connections, tick)
+    end
+
+    if plr.Character then wire(plr.Character) end
+    table.insert(Connections, plr.CharacterAdded:Connect(wire))
+end
+
+local function refreshESP()
+    nukeESP()
+    if not ESP.enabled then return end
+    for _, p in ipairs(Players:GetPlayers()) do attachESP(p) end
+    table.insert(Connections, Players.PlayerAdded:Connect(function(p)
+        if ESP.enabled then attachESP(p) end
+    end))
+    table.insert(Connections, Players.PlayerRemoving:Connect(function(p)
+        if ESPData[p] then cleanup(ESPData[p]); ESPData[p] = nil end
+    end))
+end
+
+local function toggleESP()
+    ESP.enabled = not ESP.enabled
+    refreshESP()
+end
+
+-- ===== KEYBIND =====
+local function bindKey(keyRef, cb)
+    table.insert(Connections, UIS.InputBegan:Connect(function(input, gpe)
+        if gpe then return end
+        if input.KeyCode == Keys[keyRef] then cb() end
+    end))
+end
+
+bindKey("flyToggle", function() toggleFly(); syncUI() end)
+
+-- ===== UI =====
+local gui = Instance.new("ScreenGui")
+gui.Name = randStr(12)
+gui.Parent = LocalPlayer:WaitForChild("PlayerGui")
+gui.ResetOnSpawn = false
+
+local main = Instance.new("Frame")
+main.Size = UDim2.new(0, 340, 0, 500)
+main.Position = UDim2.new(0.5, -170, 0.5, -250)
+main.BackgroundColor3 = Color3.fromRGB(18, 18, 23)
+main.BorderSizePixel = 0
+main.Active = true
+main.Draggable = true
+main.Parent = gui
+
+local uic = Instance.new("UICorner")
+uic.CornerRadius = UDim.new(0, 8)
+uic.Parent = main
+
+local uis = Instance.new("UIStroke")
+uis.Color = Color3.fromRGB(160, 50, 50)
+uis.Thickness = 1.5
+uis.Parent = main
+
+local title = Instance.new("TextLabel")
+title.Size = UDim2.new(1, 0, 0, 38)
+title.BackgroundColor3 = Color3.fromRGB(26, 26, 33)
+title.TextColor3 = Color3.fromRGB(255, 100, 100)
+title.Font = Enum.Font.SourceSansBold
+title.TextSize = 18
+title.Text = "  ZANZ HUB v2"
+title.TextXAlignment = Enum.TextXAlignment.Left
+title.BorderSizePixel = 0
+title.Parent = main
+
+local tc = Instance.new("UICorner")
+tc.CornerRadius = UDim.new(0, 8)
+tc.Parent = title
+
+local closeBtn = Instance.new("TextButton")
+closeBtn.Size = UDim2.new(0, 36, 0, 36)
+closeBtn.Position = UDim2.new(1, -36, 0, 0)
+closeBtn.BackgroundColor3 = Color3.fromRGB(190, 45, 45)
+closeBtn.TextColor3 = Color3.new(1, 1, 1)
+closeBtn.Font = Enum.Font.SourceSansBold
+closeBtn.TextSize = 18
+closeBtn.Text = "X"
+closeBtn.BorderSizePixel = 0
+closeBtn.Parent = title
+closeBtn.MouseButton1Click:Connect(function()
+    gui:Destroy()
+    nukeESP()
+    killFly()
+end)
+
+local cc = Instance.new("UICorner")
+cc.CornerRadius = UDim.new(0, 8)
+cc.Parent = closeBtn
+
+local scroll = Instance.new("ScrollingFrame")
+scroll.Size = UDim2.new(1, -16, 1, -50)
+scroll.Position = UDim2.new(0, 8, 0, 46)
+scroll.CanvasSize = UDim2.new(0, 0, 0, 520)
+scroll.ScrollBarThickness = 4
+scroll.BackgroundTransparency = 1
+scroll.BorderSizePixel = 0
+scroll.Parent = main
+
+local function makeSection(parent, titleText, y, h)
+    local f = Instance.new("Frame")
+    f.Size = UDim2.new(1, -8, 0, h)
+    f.Position = UDim2.new(0, 4, 0, y)
+    f.BackgroundColor3 = Color3.fromRGB(26, 26, 33)
+    f.BorderSizePixel = 0
+    f.Parent = parent
+    local c = Instance.new("UICorner")
+    c.CornerRadius = UDim.new(0, 6)
+    c.Parent = f
+    local l = Instance.new("TextLabel")
+    l.Size = UDim2.new(1, -20, 0, 22)
+    l.Position = UDim2.new(0, 10, 0, 6)
+    l.BackgroundTransparency = 1
+    l.TextColor3 = Color3.fromRGB(255, 140, 80)
+    l.Font = Enum.Font.SourceSansBold
+    l.TextSize = 14
+    l.Text = " " .. titleText
+    l.TextXAlignment = Enum.TextXAlignment.Left
+    l.Parent = f
+    return f
+end
+
+local function makeBtn(parent, x, y, w, h, txt, bg, cb)
+    local b = Instance.new("TextButton")
+    b.Size = UDim2.new(0, w, 0, h)
+    b.Position = UDim2.new(0, x, 0, y)
+    b.BackgroundColor3 = bg
+    b.TextColor3 = Color3.new(1, 1, 1)
+    b.Font = Enum.Font.SourceSansBold
+    b.TextSize = 12
+    b.Text = txt
+    b.BorderSizePixel = 0
+    b.Parent = parent
+    local c = Instance.new("UICorner")
+    c.CornerRadius = UDim.new(0, 5)
+    c.Parent = b
+    if cb then b.MouseButton1Click:Connect(cb) end
+    return b
+end
+
+local function makeLabel(parent, x, y, w, h, txt, sz)
+    local l = Instance.new("TextLabel")
+    l.Size = UDim2.new(0, w, 0, h)
+    l.Position = UDim2.new(0, x, 0, y)
+    l.BackgroundTransparency = 1
+    l.TextColor3 = Color3.fromRGB(200, 200, 200)
+    l.Font = Enum.Font.SourceSans
+    l.TextSize = sz or 12
+    l.Text = txt
+    l.TextXAlignment = Enum.TextXAlignment.Left
+    l.Parent = parent
+    return l
+end
+
+local function makeInput(parent, x, y, w, h, txt, cb)
+    local b = Instance.new("TextBox")
+    b.Size = UDim2.new(0, w, 0, h)
+    b.Position = UDim2.new(0, x, 0, y)
+    b.BackgroundColor3 = Color3.fromRGB(38, 38, 45)
+    b.TextColor3 = Color3.new(1, 1, 1)
+    b.Font = Enum.Font.SourceSans
+    b.TextSize = 12
+    b.Text = txt
+    b.BorderSizePixel = 0
+    b.Parent = parent
+    local c = Instance.new("UICorner")
+    c.CornerRadius = UDim.new(0, 4)
+    c.Parent = b
+    if cb then b.FocusLost:Connect(function(enter) cb(b, enter) end) end
+    return b
+end
+
+local captureMode = false
+local captureTarget = nil
+
+-- FLY SECTION
+local flySec = makeSection(scroll, "FLIGHT", 4, 170)
+local flyBtn = makeBtn(flySec, 10, 32, 130, 30, "FLY: OFF", Color3.fromRGB(180, 55, 55), function()
+    toggleFly()
+    syncUI()
+end)
+makeLabel(flySec, 150, 32, 60, 30, "Speed:", 12)
+local speedBox = makeInput(flySec, 210, 34, 70, 24, tostring(Fly.speed), function(box)
+    local n = tonumber(box.Text)
+    if n then Fly.speed = math.clamp(n, 1, 1000); speedBox.Text = tostring(Fly.speed) end
+end)
+
+makeLabel(flySec, 10, 75, 120, 20, "Fly Toggle Key:", 12)
+local flyKeyBtn = makeBtn(flySec, 130, 72, 140, 24, "[" .. Keys.flyToggle.Name .. "]", Color3.fromRGB(55, 55, 65), function()
+    captureMode = true
+    captureTarget = "flyToggle"
+    flyKeyBtn.Text = "... press any key ..."
+    flyKeyBtn.BackgroundColor3 = Color3.fromRGB(220, 150, 30)
+end)
+
+makeLabel(flySec, 10, 110, 160, 20, "WASD = move | SPACE = up | SHIFT = down", 10)
+
+-- ESP SECTION
+local espSec = makeSection(scroll, "WALLHACK (ESP)", 188, 160)
+local espBtn = makeBtn(espSec, 10, 32, 130, 30, "ESP: OFF", Color3.fromRGB(180, 55, 55), function()
+    toggleESP()
+    syncUI()
+end)
+makeBtn(espSec, 150, 32, 140, 30, "Refresh ESP", Color3.fromRGB(90, 55, 170), function()
+    if ESP.enabled then refreshESP() end
+end)
+
+local tcBtn = makeBtn(espSec, 10, 72, 240, 26, "Team Check: OFF", Color3.fromRGB(38, 38, 45), function()
+    ESP.teamCheck = not ESP.teamCheck
+    tcBtn.Text = ESP.teamCheck and "Team Check: ON" or "Team Check: OFF"
+    tcBtn.BackgroundColor3 = ESP.teamCheck and Color3.fromRGB(55, 90, 170) or Color3.fromRGB(38, 38, 45)
+    if ESP.enabled then refreshESP() end
+end)
+
+makeLabel(espSec, 10, 108, 80, 20, "Max Dist:", 12)
+local distBox = makeInput(espSec, 80, 110, 80, 22, tostring(ESP.maxDist), function(box)
+    local n = tonumber(box.Text)
+    if n then ESP.maxDist = math.clamp(n, 100, 99999) end
+end)
+
+makeLabel(espSec, 10, 138, 80, 20, "Text Size:", 12)
+makeInput(espSec, 80, 140, 50, 20, tostring(ESP.txtSize), function(box)
+    local n = tonumber(box.Text)
+    if n then ESP.txtSize = math.clamp(n, 8, 24) end
+end)
+
+-- HOTKEY SECTION
+local hkSec = makeSection(scroll, "CUSTOM HOTKEYS", 362, 140)
+makeLabel(hkSec, 10, 32, 200, 20, "Fly Toggle Key:", 12)
+local hkFlyBtn = makeBtn(hkSec, 150, 30, 150, 24, "[" .. Keys.flyToggle.Name .. "]", Color3.fromRGB(55, 55, 65), function()
+    captureMode = true
+    captureTarget = "flyToggle"
+    hkFlyBtn.Text = "... press any key ..."
+    hkFlyBtn.BackgroundColor3 = Color3.fromRGB(220, 150, 30)
+end)
+makeLabel(hkSec, 10, 65, 300, 20, "Rebind any key by clicking the button then pressing a key", 10)
+makeLabel(hkSec, 10, 90, 300, 16, "Keybinds save for session only.", 10)
+
+-- SYNC UI STATE
+function syncUI()
+    flyBtn.Text = Fly.enabled and "FLY: ON" or "FLY: OFF"
+    flyBtn.BackgroundColor3 = Fly.enabled and Color3.fromRGB(55, 180, 55) or Color3.fromRGB(180, 55, 55)
+    espBtn.Text = ESP.enabled and "ESP: ON" or "ESP: OFF"
+    espBtn.BackgroundColor3 = ESP.enabled and Color3.fromRGB(55, 180, 55) or Color3.fromRGB(180, 55, 55)
+    hkFlyBtn.Text = "[" .. Keys.flyToggle.Name .. "]"
+    flyKeyBtn.Text = "[" .. Keys.flyToggle.Name .. "]"
+end
+
+-- GLOBAL KEY CAPTURE
+table.insert(Connections, UIS.InputBegan:Connect(function(input, gpe)
+    if not captureMode then return end
+    captureMode = false
+    if not input or input.UserInputType == Enum.UserInputType.MouseButton1 then return end
+    local kc = input.KeyCode
+    if kc == Enum.KeyCode.Unknown then return end
+    if captureTarget and Keys[captureTarget] then
+        Keys[captureTarget] = kc
+    end
+    syncUI()
+    hkFlyBtn.BackgroundColor3 = Color3.fromRGB(55, 55, 65)
+    flyKeyBtn.BackgroundColor3 = Color3.fromRGB(55, 55, 65)
+    task.wait(0.1)
+    for _, cx in ipairs(Connections) do disconnect(cx) end
+    Connections = {}
+    bindKey("flyToggle", function() toggleFly(); syncUI() end)
+end))
+
+-- RESPAWN HANDLER
+table.insert(Connections, LocalPlayer.CharacterAdded:Connect(function()
+    if Fly.enabled then
+        killFly()
+        task.wait(0.15)
+        buildFly()
+    end
+end))
+
+-- INIT
+for _, p in ipairs(Players:GetPlayers()) do
+    if ESP.enabled then attachESP(p) end
+end
+
+-- TELEPORT CLEANUP
+LocalPlayer.OnTeleport:Connect(function(state)
+    if state == Enum.TeleportState.Started then
+        nukeESP()
+        killFly()
+    end
+end)
+
+-- PROTECT GUI
+pcall(function()
+    if syn and syn.protect_gui then
+        syn.protect_gui(gui)
+    end
+end)
+
+-- NOTIFY
+pcall(function()
+    game.StarterGui:SetCore("SendNotification", {
+        Title = "ZANZ HUB v2",
+        Text = "Loaded | F = Fly | Rebind in menu",
+        Duration = 5,
+    })
+end)
