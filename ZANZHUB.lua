@@ -253,6 +253,21 @@ local tc = Instance.new("UICorner")
 tc.CornerRadius = UDim.new(0, 8)
 tc.Parent = title
 
+local minBtn = Instance.new("TextButton")
+minBtn.Size = UDim2.new(0, 36, 0, 36)
+minBtn.Position = UDim2.new(1, -74, 0, 0)
+minBtn.BackgroundColor3 = Color3.fromRGB(180, 130, 30)
+minBtn.TextColor3 = Color3.new(1, 1, 1)
+minBtn.Font = Enum.Font.SourceSansBold
+minBtn.TextSize = 18
+minBtn.Text = "_"
+minBtn.BorderSizePixel = 0
+minBtn.Parent = title
+
+local mCorner = Instance.new("UICorner")
+mCorner.CornerRadius = UDim.new(0, 8)
+mCorner.Parent = minBtn
+
 local closeBtn = Instance.new("TextButton")
 closeBtn.Size = UDim2.new(0, 36, 0, 36)
 closeBtn.Position = UDim2.new(1, -36, 0, 0)
@@ -265,6 +280,7 @@ closeBtn.BorderSizePixel = 0
 closeBtn.Parent = title
 closeBtn.MouseButton1Click:Connect(function()
     gui:Destroy()
+    if floatToggle then floatToggle:Destroy() end
     nukeESP()
     killFly()
 end)
@@ -272,6 +288,48 @@ end)
 local cc = Instance.new("UICorner")
 cc.CornerRadius = UDim.new(0, 8)
 cc.Parent = closeBtn
+
+local floatToggle = Instance.new("TextButton")
+floatToggle.Size = UDim2.new(0, 100, 0, 32)
+floatToggle.Position = UDim2.new(0, 10, 1, -50)
+floatToggle.BackgroundColor3 = Color3.fromRGB(160, 50, 50)
+floatToggle.TextColor3 = Color3.new(1, 1, 1)
+floatToggle.Font = Enum.Font.SourceSansBold
+floatToggle.TextSize = 14
+floatToggle.Text = "OPEN"
+floatToggle.BorderSizePixel = 0
+floatToggle.Active = true
+floatToggle.Draggable = true
+floatToggle.Visible = false
+floatToggle.Parent = gui
+
+local ftCorner = Instance.new("UICorner")
+ftCorner.CornerRadius = UDim.new(0, 6)
+ftCorner.Parent = floatToggle
+
+local ftStroke = Instance.new("UIStroke")
+ftStroke.Color = Color3.fromRGB(255, 100, 100)
+ftStroke.Thickness = 1.5
+ftStroke.Parent = floatToggle
+
+floatToggle.MouseButton1Click:Connect(function()
+    if main.Visible then
+        main.Visible = false
+        scroll.Visible = false
+        floatToggle.Text = "OPEN"
+    else
+        main.Visible = true
+        scroll.Visible = true
+        floatToggle.Text = "CLOSE"
+    end
+end)
+
+minBtn.MouseButton1Click:Connect(function()
+    main.Visible = false
+    scroll.Visible = false
+    floatToggle.Visible = true
+    floatToggle.Text = "OPEN"
+end)
 
 local scroll = Instance.new("ScrollingFrame")
 scroll.Size = UDim2.new(1, -16, 1, -50)
